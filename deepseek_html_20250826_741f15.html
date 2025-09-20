@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robinhood-Style Trading</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #f6f9fc 0%, #eef2f7 100%);
+      color: #333;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      margin-bottom: 20px;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 22px;
+      color: #00d09c;
+    }
+    
+    .logo i {
+      font-size: 28px;
+    }
+    
+    .user-actions {
+      display: flex;
+      gap: 15px;
+    }
+    
+    .user-actions button {
+      background: #f8f9fa;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #5f6368;
+      transition: all 0.2s;
+    }
+    
+    .user-actions button:hover {
+      background: #e8eaed;
+    }
+    
+    .main-content {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 20px;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .card-title {
+      font-weight: 600;
+      font-size: 18px;
+      color: #3a3d42;
+    }
+    
+    .stock-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .stock-name {
+      font-size: 28px;
+      font-weight: 700;
+    }
+    
+    .stock-price {
+      font-size: 32px;
+      font-weight: 700;
+    }
+    
+    .stock-change {
+      font-size: 16px;
+      color: #00d09c;
+      font-weight: 600;
+      margin-top: 5px;
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    
+    .stat-box {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 15px;
+    }
+    
+    .stat-label {
+      font-size: 13px;
+      color: #5f6368;
+      margin-bottom: 5px;
+    }
+    
+    .stat-value {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .actions {
+      display: flex;
+      gap: 15px;
+      margin: 25px 0;
+    }
+    
+    .btn {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-buy {
+      background: #00d09c;
+      color: white;
+    }
+    
+    .btn-buy:hover {
+      background: #00b386;
+    }
+    
+    .btn-sell {
+      background: #ff6670;
+      color: white;
+    }
+    
+    .btn-sell:hover {
+      background: #e05a63;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    th {
+      text-align: left;
+      padding: 12px 15px;
+      font-weight: 600;
+      color: #5f6368;
+      border-bottom: 1px solid #eee;
+    }
+    
+    td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    
+    tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .positive {
+      color: #00d09c;
+    }
+    
+    .negative {
+      color: #ff6670;
+    }
+    
+    .order-open {
+      background: rgba(0, 208, 156, 0.08);
+    }
+    
+    .order-open td:first-child {
+      border-left: 4px solid #00d09c;
+    }
+    
+    .order-history {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .portfolio-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .portfolio-value {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 10px 0 5px;
+    }
+    
+    .cash-balance {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+    
+    .cash-label {
+      font-size: 14px;
+      color: #5f6368;
+    }
+    
+    .cash-amount {
+      font-size: 22px;
+      font-weight: 700;
+      margin-top: 5px;
+    }
+    
+    .settings {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .setting-item {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 12px 15px;
+      flex: 1;
+      min-width: 120px;
+    }
+    
+    .setting-label {
+      font-size: 13px;
+      color: #5f6368;
+    }
+    
+    .setting-value {
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 3px;
+    }
+    
+    @media (max-width: 768px) {
+      .main-content {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats {
+        grid-template-columns: 1fr;
+      }
+      
+      .portfolio-summary {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <i class="fas fa-chart-line"></i>
+        <span>TradeHub</span>
+      </div>
+      <div class="user-actions">
+        <button><i class="fas fa-bell"></i></button>
+        <button><i class="fas fa-user"></i></button>
+      </div>
+    </header>
+    
+    <div class="main-content">
+      <div class="left-column">
+        <div class="card">
+          <div class="stock-header">
+            <div>
+              <h1 class="stock-name">CLSK</h1>
+              <div class="stock-price">$96.79</div>
+              <div class="stock-change">+0.0%</div>
+            </div>
+            <div class="actions">
+              <button class="btn btn-buy">Buy</button>
+              <button class="btn btn-sell">Sell</button>
+            </div>
+          </div>
+          
+          <div class="stats">
+            <div class="stat-box">
+              <div class="stat-label">Daily Range</div>
+              <div class="stat-value">$94.31 - $97.54</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Volume</div>
+              <div class="stat-value">15.55M</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Avg Volume</div>
+              <div class="stat-value">19.58M</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Active Positions</h2>
+          </div>
+          
+          <table>
+            <thead>
+              <tr>
+                <th>Symbol</th>
+                <th>Shares</th>
+                <th>Avg Price</th>
+                <th>Current</th>
+                <th>P/L %</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>MULF</td>
+                <td>0.5461</td>
+                <td>$9.15</td>
+                <td>$9.15</td>
+                <td class="positive">0.0%</td>
+              </tr>
+              <tr>
+                <td>CSX</td>
+                <td>0.1446</td>
+                <td>$34.57</td>
+                <td>$34.57</td>
+                <td class="positive">0.0%</td>
+              </tr>
+              <tr>
+                <td>CORZ</td>
+                <td>0.3693</td>
+                <td>$13.54</td>
+                <td>$13.54</td>
+                <td class="positive">0.0%</td>
+              </tr>
+              <tr>
+                <td>TEM</td>
+                <td>0.0621</td>
+                <td>$80.50</td>
+                <td>$80.50</td>
+                <td class="positive">0.0%</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <div class="portfolio-summary">
+            <div>
+              <div class="stat-label">Total Invested</div>
+              <div class="portfolio-value">$20.00</div>
+            </div>
+            <div>
+              <div class="stat-label">Current Value</div>
+              <div class="portfolio-value">$20.00</div>
+            </div>
+          </div>
+          
+          <div class="cash-balance">
+            <div class="cash-label">Available Cash</div>
+            <div class="cash-amount">$980.00</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="right-column">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Order History</h2>
+          </div>
+          
+          <div class="order-history">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Symbol</th>
+                  <th>Type</th>
+                  <th>Shares</th>
+                  <th>Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="order-open">
+                  <td>--:--:--</td>
+                  <td>CLSK</td>
+                  <td class="positive">BUY</td>
+                  <td>--</td>
+                  <td>$91.95</td>
+                </tr>
+                <tr>
+                  <td>09:32:47</td>
+                  <td>MULF</td>
+                  <td class="positive">BUY</td>
+                  <td>0.5461</td>
+                  <td>$9.1550</td>
+                </tr>
+                <tr>
+                  <td>09:32:51</td>
+                  <td>CSX</td>
+                  <td class="positive">BUY</td>
+                  <td>0.1446</td>
+                  <td>$34.5700</td>
+                </tr>
+                <tr>
+                  <td>09:36:27</td>
+                  <td>CORZ</td>
+                  <td class="positive">BUY</td>
+                  <td>0.3693</td>
+                  <td>$13.5400</td>
+                </tr>
+                <tr>
+                  <td>09:36:34</td>
+                  <td>TEM</td>
+                  <td class="positive">BUY</td>
+                  <td>0.0621</td>
+                  <td>$80.5000</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Trading Settings</h2>
+          </div>
+          
+          <div class="settings">
+            <div class="setting-item">
+              <div class="setting-label">Refresh</div>
+              <div class="setting-value">100s</div>
+            </div>
+            <div class="setting-item">
+              <div class="setting-label">Buy Threshold</div>
+              <div class="setting-value">5.00%</div>
+            </div>
+            <div class="setting-item">
+              <div class="setting-label">Sell Threshold</div>
+              <div class="setting-value">10.00%</div>
+            </div>
+            <div class="setting-item">
+              <div class="setting-label">Buy Amount</div>
+              <div class="setting-value">$5.00</div>
+            </div>
+          </div>
+          
+          <div class="card-header" style="margin-top: 15px;">
+            <h2 class="card-title">Next Orders</h2>
+          </div>
+          
+          <div class="stats">
+            <div class="stat-box">
+              <div class="stat-label">Next Buy Price</div>
+              <div class="stat-value">$91.95</div>
+              <div class="stat-label">-5.00% from current</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Next Sell Price</div>
+              <div class="stat-value">$106.47</div>
+              <div class="stat-label">+10.00% from current</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Simple animation for stock price changes
+    const stockPriceEl = document.querySelector('.stock-price');
+    const stockChangeEl = document.querySelector('.stock-change');
+    
+    function simulatePriceChange() {
+      const currentPrice = parseFloat(stockPriceEl.textContent.substring(1));
+      const changePercent = (Math.random() - 0.5) * 0.5; // Random change between -0.25% and +0.25%
+      const newPrice = currentPrice * (1 + changePercent);
+      
+      stockPriceEl.textContent = '$' + newPrice.toFixed(2);
+      
+      if (changePercent >= 0) {
+        stockChangeEl.textContent = '+' + (changePercent * 100).toFixed(2) + '%';
+        stockChangeEl.className = 'stock-change positive';
+      } else {
+        stockChangeEl.textContent = (changePercent * 100).toFixed(2) + '%';
+        stockChangeEl.className = 'stock-change negative';
+      }
+    }
+    
+    // Update price every 5 seconds to simulate live changes
+    setInterval(simulatePriceChange, 5000);
+  </script>
+</body>
+</html>
